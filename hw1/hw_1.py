@@ -5,6 +5,7 @@ import re
 import subprocess
 import sys
 
+
 def ping_website(target: str) -> tuple[float, float, float]:
     """
     :param target: The website to ping.
@@ -23,8 +24,7 @@ def ping_website(target: str) -> tuple[float, float, float]:
     pattern = r'(\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)'
 
     match = re.search(pattern, bash_ping_result.stdout)
-    result = tuple(map(float, match.groups()))
-    return result
+    return tuple(map(float, match.groups()))
 
 
 def extract_sites_from_txt(filename: str) -> list[str]:
