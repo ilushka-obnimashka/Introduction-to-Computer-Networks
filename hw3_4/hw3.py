@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 def init_browser():
     """
     Инициализирует браузер Chrome в режиме без графического интерфейса.
@@ -93,7 +94,8 @@ def parser_catalog(driver) -> list[dict[str, str]] :
 
             try:
                 price = product.find_element(By.CSS_SELECTOR,
-                                              'div.price_matrix_block div.price_matrix_wrapper div.price[data-currency][data-value]').get_attribute('data-value')
+                                              'div.price_matrix_block div.price_matrix_wrapper div.price[data-currency]'
+                                              '[data-value]').get_attribute('data-value')
                 fix_price = 'yes'
             except NoSuchElementException:
                 fix_price = 'no'
