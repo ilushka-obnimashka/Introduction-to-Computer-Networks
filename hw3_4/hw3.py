@@ -2,10 +2,10 @@ import click
 import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 
 
 def init_browser():
@@ -18,7 +18,6 @@ def init_browser():
     options = Options()
     options.add_argument("--headless")
     driver = webdriver.Chrome(service=service, options=options)
-    driver.maximize_window()
     return driver
 
 def select_city(driver, city_name: str):
