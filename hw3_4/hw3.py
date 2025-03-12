@@ -17,8 +17,7 @@ def init_browser():
     service = Service(ChromeDriverManager().install())
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
+    return webdriver.Chrome(service=service, options=options)
 
 def select_city(driver, city_name: str):
     """
@@ -72,7 +71,7 @@ def find_target_page(driver):
         "#bx_1847241719_80 > table > tbody > tr > td.section_info > ul > li.name > a > span"
     ).click()
 
-def parser_catalog(driver) -> list[dict[str, str]] :
+def parse_catalog(driver) -> list[dict[str, str]] :
     """
     Парсит каталог букетов и собирает данные в список словарей.
     Args:
@@ -169,7 +168,7 @@ def main(**kwargs) -> None:
     driver.get('https://la-rose.ru/')
     select_city(driver, target_city)
     find_target_page(driver)
-    catalog = parser_catalog(driver)
+    catalog = parse_catalog(driver)
     pack_data_into_csv(kwargs['output'], catalog)
     driver.quit()
 
