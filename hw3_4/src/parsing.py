@@ -1,46 +1,39 @@
-import click
+"""
+Этот файл предостовляет функции для парсинга сайта la-rose.ru и сбора информации о актуальном каталоге букетов,
+включая название, URL изображения, цену (фиксированную или нет) и статус новинки.
+Собранные данные могут сохранятся в CSV-файл.
+"""
 import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from fastapi import FastAPI
-import psycopg2
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
-app = FastAPI()
+from main import MyType
 
-
-def connect_to_db(host: str, port: int = 5432, password: str = None, db=None) -> psycopg2.extensions.connection:
-    try:
-        connection = psycopg2.connect(host=host, port=port, password=password, dbname=db)
-        return connection
-    except Exception as ex:
-        print("\u001b[48;5;26m[INFO]\u001b[0m: \u001b[31mEROR:\u001b while working with PostgreSQL\u001b[0m", ex)
-        exit(1)
-
-
-
-def init_browser():
+def init_browser() -> webdriver.Chrome:
     """
     Инициализирует браузер Chrome в режиме без графического интерфейса.
-    returns:
+
+    Returns:
         webdriver.Chrome: Объект драйвера для управления браузером.
     """
     service = Service(ChromeDriverManager().install())
     options = Options()
     options.add_argument("--headless")
-    return webdriver.Chrome(service=service, options=options)
+    browser = webdriver.Chrome(service=service, options=options)
+    return browser
 
 
-def select_city(driver, city_name: str):
+def select_city(driver: webdriver.Chrome, city_name: str) -> None:
     """
     Выбирает указанный город через всплывающее окно при запуске сайта.
-    Args:
-        driver (webdriver.Chrome): Объект драйвера браузера.
 
-        city_name: Название города для выбора
+    Args:
+        driver: Объект драйвера браузера.
+        city_name: Название города для выбора.
     """
     city_confirmation_message = driver.find_element(
         By.CSS_SELECTOR, '#main > div.confirm_region > div.title'
@@ -70,11 +63,12 @@ def select_city(driver, city_name: str):
         driver.find_element(By.XPATH, f'//a[text()="{city_name}"]').click()
 
 
-def find_target_page(driver):
+def find_target_page(driver: webdriver.Chrome) -> None:
     """
     Находит целевую страницу для парсинга: menu -> каталог -> букеты.
+
     Args:
-        driver (webdriver.Chrome): Объект драйвера браузера.
+        driver: Объект драйвера браузера.
     """
     driver.find_element(
         By.CSS_SELECTOR, '#new-tmp-header-menu > div.mobileheader-v1 > div > span'
@@ -88,13 +82,16 @@ def find_target_page(driver):
     ).click()
 
 
-def parse_catalog(driver) -> list[dict[str, str]]:
+def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int | MyType]] :
     """
     Парсит каталог букетов и собирает данные в список словарей.
+
     Args:
-        driver (webdriver.Chrome): Объект драйвера браузера.
+        driver: Объект драйвера браузера.
+
     Returns:
-        Список словарей с данными о букетах.
+        Список словарей с данными о букетах, где каждый словарь представляет собой один букет.
+        Ключи словаря: 'title', 'image_url', 'fix_price', 'price', 'new_release'.
     """
     catalog = []
 
@@ -113,16 +110,16 @@ def parse_catalog(driver) -> list[dict[str, str]]:
                 price = product.find_element(By.CSS_SELECTOR,
                                              'div.price_matrix_block div.price_matrix_wrapper div.price[data-currency]'
                                              '[data-value]').get_attribute('data-value')
-                fix_price = 'yes'
+                fix_price = MyType.YES
             except NoSuchElementException:
-                fix_price = 'no'
+                fix_price = MyType.NO
                 price = product.find_element(By.CSS_SELECTOR, 'div.price.flex.mob-price').text
                 price = price.replace(' ', '').replace('₽', '')
 
             try:
                 new_release = product.find_element(By.CSS_SELECTOR, 'div.sticker_novinka').text
             except NoSuchElementException:
-                new_release = 'no'
+                new_release = MyType.NO
 
             catalog.append({
                 'title': title,
@@ -147,52 +144,15 @@ def parse_catalog(driver) -> list[dict[str, str]]:
 def pack_data_into_csv(filename: str, data: list[dict[str, str]]) -> None:
     """
     Сохраняет данные в CSV файл.
+
     Args:
-        filename (str): Имя выходного CSV файла.
-        data (list[dict]): Данные для записи в файл.
+        filename: Имя выходного CSV файла.
+        data: Данные для записи в файл (список словарей).
     """
     parsed_df = pd.DataFrame(data)
-    parsed_df.columns = data[0].keys()
-
     try:
         parsed_df.to_csv(filename, index=False)
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
+    except Exception as ex:
+        print("\u001b[48;5;26m[INFO]\u001b[0m: \u001b[31mEROR:\u001b while recording in CSV\u001b[0m", ex)
+        exit (1)
 
-
-@click.command()
-@click.option(
-    '--city',
-    default='Новосибирск',
-    type=str,
-    help='Указывает город для парсинга сайта "la-rose.ru/" и получения текущего ассортимента цветов.'
-)
-@click.option(
-    '--output',
-    default='output.csv',
-    type=str,
-    help='Указывает имя выходного файла с результатами работы скрипта.'
-)
-def main(**kwargs) -> None:
-    """
-    Основная функция для запуска скрипта парсинга.
-    Args:
-        kwargs : Аргументы командной строки.
-    """
-    target_city = kwargs['city']
-    if target_city not in ['Москва', 'Барнаул', 'Новосибирск']:
-        raise ValueError(
-            f'Недопустимый город: "{target_city}". Допустимые города: Москва, Барнаул, Новосибирск.'
-        )
-
-    driver = init_browser()
-    driver.get('https://la-rose.ru/')
-    select_city(driver, target_city)
-    find_target_page(driver)
-    catalog = parse_catalog(driver)
-    pack_data_into_csv(kwargs['output'], catalog)
-    driver.quit()
-
-
-if __name__ == '__main__':
-    main()
