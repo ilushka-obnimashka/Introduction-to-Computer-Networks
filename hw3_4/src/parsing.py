@@ -47,18 +47,15 @@ def select_city(driver: webdriver.Chrome, city_name: str) -> None:
     elif city_name not in text and city_name == 'Москва':
         driver.find_element(
             By.CSS_SELECTOR,
-            '#main > div.confirm_region > div.buttons > span.btn.btn-default.white.js_city_change'
-        ).click()
+            '#main > div.confirm_region > div.buttons > span.btn.btn-default.white.js_city_change').click()
         driver.find_element(
             By.CSS_SELECTOR,
             '#main > div.city_chooser_small_frame.jqmWindow.popup.jqm-init.show > div > '
-            'div.popup_regions > div.items.only_city > div > div > div.item.current'
-        ).click()
+            'div.popup_regions > div.items.only_city > div > div > div.item.current').click()
     else:
         driver.find_element(
             By.CSS_SELECTOR,
-            '#main > div.confirm_region > div.buttons > span.btn.btn-default.white.js_city_change'
-        ).click()
+            '#main > div.confirm_region > div.buttons > span.btn.btn-default.white.js_city_change').click()
         driver.find_element(By.XPATH, f'//a[text()="{city_name}"]').click()
 
 
@@ -70,15 +67,12 @@ def find_target_page(driver: webdriver.Chrome) -> None:
         driver: Объект драйвера браузера.
     """
     driver.find_element(
-        By.CSS_SELECTOR, '#new-tmp-header-menu > div.mobileheader-v1 > div > span'
-    ).click()
+        By.CSS_SELECTOR, '#new-tmp-header-menu > div.mobileheader-v1 > div > span').click()
     driver.find_element(
-        By.CSS_SELECTOR, '#new-mobilemenu > div > div > ul > li:nth-child(1) > a > span'
-    ).click()
+        By.CSS_SELECTOR, '#new-mobilemenu > div > div > ul > li:nth-child(1) > a > span').click()
     driver.find_element(
         By.CSS_SELECTOR,
-        "#bx_1847241719_80 > table > tbody > tr > td.section_info > ul > li.name > a > span"
-    ).click()
+        "#bx_1847241719_80 > table > tbody > tr > td.section_info > ul > li.name > a > span").click()
 
 
 def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int]]:
