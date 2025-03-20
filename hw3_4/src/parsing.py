@@ -93,11 +93,9 @@ def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int]]:
 
         for product in products:
             title = product.find_element(By.XPATH,
-                                         './/img[@src and @data-hover-image and @alt and @title]').get_attribute(
-                'title')
+                                         './/img[@src and @data-hover-image and @alt and @title]').get_attribute('title')
             image_url = product.find_element(By.XPATH,
-                                             './/img[@src and @data-hover-image and @alt and @title]').get_attribute(
-                'src')
+                                             './/img[@src and @data-hover-image and @alt and @title]').get_attribute('src')
 
             try:
                 price = product.find_element(By.CSS_SELECTOR,
