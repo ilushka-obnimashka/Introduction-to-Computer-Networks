@@ -1,7 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi import HTTPException
-from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.database import init_db_session, pack_data_into_db, Base
