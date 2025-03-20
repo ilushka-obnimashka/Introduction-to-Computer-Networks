@@ -3,7 +3,6 @@
 включая название, URL изображения, цену (фиксированную или нет) и статус новинки.
 Собранные данные могут сохранятся в CSV-файл.
 """
-import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
