@@ -11,7 +11,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from main import MyType
 
 def init_browser() -> webdriver.Chrome:
     """
@@ -23,6 +22,7 @@ def init_browser() -> webdriver.Chrome:
     service = Service(ChromeDriverManager().install())
     options = Options()
     options.add_argument("--headless")
+    options.add_argument("--start-maximized")
     browser = webdriver.Chrome(service=service, options=options)
     return browser
 
@@ -82,7 +82,7 @@ def find_target_page(driver: webdriver.Chrome) -> None:
     ).click()
 
 
-def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int | MyType]] :
+def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int]]:
     """
     Парсит каталог букетов и собирает данные в список словарей.
 
@@ -110,16 +110,16 @@ def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int | MyType
                 price = product.find_element(By.CSS_SELECTOR,
                                              'div.price_matrix_block div.price_matrix_wrapper div.price[data-currency]'
                                              '[data-value]').get_attribute('data-value')
-                fix_price = MyType.YES
+                fix_price = "yes"
             except NoSuchElementException:
-                fix_price = MyType.NO
+                fix_price = "no"
                 price = product.find_element(By.CSS_SELECTOR, 'div.price.flex.mob-price').text
                 price = price.replace(' ', '').replace('₽', '')
 
             try:
                 new_release = product.find_element(By.CSS_SELECTOR, 'div.sticker_novinka').text
             except NoSuchElementException:
-                new_release = MyType.NO
+                new_release = "no"
 
             catalog.append({
                 'title': title,
@@ -139,20 +139,3 @@ def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int | MyType
             break
 
     return catalog
-
-
-def pack_data_into_csv(filename: str, data: list[dict[str, str]]) -> None:
-    """
-    Сохраняет данные в CSV файл.
-
-    Args:
-        filename: Имя выходного CSV файла.
-        data: Данные для записи в файл (список словарей).
-    """
-    parsed_df = pd.DataFrame(data)
-    try:
-        parsed_df.to_csv(filename, index=False)
-    except Exception as ex:
-        print("\u001b[48;5;26m[INFO]\u001b[0m: \u001b[31mEROR:\u001b while recording in CSV\u001b[0m", ex)
-        exit (1)
-
