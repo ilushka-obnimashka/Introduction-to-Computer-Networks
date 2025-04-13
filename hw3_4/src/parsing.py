@@ -1,7 +1,3 @@
-"""
-Этот файл предостовляет функции для парсинга сайта la-rose.ru и сбора информации об актуальном каталоге букетов,
-включая название, URL изображения, цену (фиксированную или нет) и статус новинки.
-"""
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -21,6 +17,8 @@ def init_browser() -> webdriver.Chrome:
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--start-maximized")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
     browser = webdriver.Chrome(service=service, options=options)
     return browser
 
@@ -92,9 +90,11 @@ def parse_catalog(driver: webdriver.Chrome) -> list[dict[str, str | int]]:
 
         for product in products:
             title = product.find_element(By.XPATH,
-                                         './/img[@src and @data-hover-image and @alt and @title]').get_attribute('title')
+                                         './/img[@src and @data-hover-image and @alt and @title]').get_attribute(
+                'title')
             image_url = product.find_element(By.XPATH,
-                                             './/img[@src and @data-hover-image and @alt and @title]').get_attribute('src')
+                                             './/img[@src and @data-hover-image and @alt and @title]').get_attribute(
+                'src')
 
             try:
                 price = product.find_element(By.CSS_SELECTOR,

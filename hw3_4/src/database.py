@@ -1,7 +1,3 @@
-"""
-Этот модуль определяет функции для взаимодействия
-с базой данных PostgreSQL, включая создание сессий, таблиц и сохранение данных.
-"""
 from datetime import datetime
 from typing import Type, List, Dict, Union
 
