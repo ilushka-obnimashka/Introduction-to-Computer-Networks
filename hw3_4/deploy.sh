@@ -4,12 +4,15 @@ IMAGE_NAME_API="fastapi_parser"
 CONTAINER_NAME_API="fastapi_parser_container"
 CONTAINER_NAME_BD="db_postgres_container"
 
-echo -e "\e[33m⏳ Останавливаем службу PostgreSQL...\e[0m"
-sudo systemctl stop postgresql || {
+echo -e "\e[33m⏳ Проверка активности службы PostgreSQL...\e[0m"
+sudo systemctl is-active --quiet postgresql && {
+    echo -e "\e[33m⏳ Останавливаем службу PostgreSQL...\e[0m"
+    sudo systemctl stop postgresql || {
     echo -e "\e[31m❌ Ошибка при остановке службы PostgreSQL.\e[0m"
     exit 1;
+    }
+    echo -e "\e[32m✅ Служба PostgreSQL успешно остановлена.\e[0m"
 }
-echo -e "\e[32m✅ Служба PostgreSQL успешно остановлена.\e[0m"
 
 docker network inspect app-network >/dev/null 2>&1 || \
     docker network create app-network
